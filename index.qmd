@@ -1,0 +1,147 @@
+---
+title: "Diseños Experimentales"
+author: 
+  - name: Franklin Santos
+    url: https://franklinsantosm.com
+    affiliation: Universidad Austral de Chile
+    orcid: 0000-0002-7509-2910
+    email: franklin25santos@gmail.com
+format: html
+editor: visual
+---
+
+## Introducción al diseño de experimentos
+
+
+### POTENCIA CÁLCULOS A PRIORI
+
+```{r}
+library(pwr)
+
+pwr.t.test(d=.8, sig.level=.05, power=.9, type="two.sample",alternative="two.sided")
+
+```
+
+3. Queremos comparar 5 grupos, con 25 sujetos por grupo, para un nivel de significación del 5%. Calculamos la potencia de la prueba para distintos valores de tamaño de efecto (f2):
+
+```{r}
+pwr.anova.test(k=5,n=25,f=0.10,sig.level=.05) #power = 0.1180955
+pwr.anova.test(k=5,n=25,f=0.25,sig.level=.05) #power = 0.5738
+pwr.anova.test(k=5,n=25,f=0.40,sig.level=.05) #power = 0.9569163
+```
+
+La potencia será de
+• 11.8% para detectar un efecto pequeño,
+• 57.4% para detectar un efecto moderado y
+• 95.7% para detectar un efecto grande.
+
+## ANDEVA CON R-Studio para diseño experimental
+
+Paquetes:
+
+- `agricolae`: Procedimientos estadísticos básicos del diseño de experimentos, diseño de factor simple, bloques aleatorios, cuadrado latino, cuadrados grecolatinos, así como pruebas de diferencia de medias.
+- `car`: técnicas para regresión aplicada
+- `phia`: técnicas para graficar diseños experimentales
+- `DoE.base`: apoyos para diseños factoriales
+- `DoE.wrapper`: creación de diseños industriales e interactúa con otros paquetes para diseño de experimentos, diseños para estimar funciones cuadráticas tales como diseños compuestos centrales y diseños de Box-Behnken
+- `FrF2`: Diseños factoriales a 2 niveles (2^k^) y factoriales fraccionados a 2 niveles (2^k-p^)
+- `qualityTools`: Diseños factoriales a 2 niveles, factoriales fraccionados a 2 niveles, análisis de múltiples respuestas, diseños de superficie de respuesta, mezcla de diseños, Método Taguchi
+- `rsm`: Metodología de superficie de respuesta
+
+## Estadística de prueba: Obtención de la Tabla Andeva (ANOVA)
+
+1. Importar los datos
+Leer los datos en R Studio. Digitando directamente (copiar y pegar).
+
+```{r}
+nema<-c(170, 210, 205, 220, 210, 200, 205, 210, 195, 215, 92, 96, 82,
+106, 114, 35, 28, 30, 32, 43, 68, 65, 72, 58, 74)
+cultivar<- as.factor(c(rep(c("Huia","Kopu","Aran","Pitau","Will"), each=5)))
+```
+
+
+2. Explorar datos de la muestra
+Estadística Descriptiva
+
+Gráfico de caja y bigote
+
+```{r}
+boxplot(nema ~ cultivar, col = c("yellow", "blue",
+"white","green","red"), ylab = "Número de
+Nemátodo")
+```
+
+Medias de los tratamientos (niveles)
+
+```{r}
+tapply(nema, cultivar, mean)
+tapply(nema, cultivar, sd)
+tapply(nema, cultivar, range)
+```
+
+
+3. Obtención de tabla ANOVA Esta es la forma de pedir un ANOVA en R:
+
+Códigos necesarios (cargar paquete agricolae)
+
+```{r, eval=FALSE}
+install.packages("agricolae")
+```
+
+```{r}
+#Calculo Andeva del ejercicio de los nematodos según cultivar
+library(agricolae)
+an_e1<-aov(lm(nema~cultivar))
+```
+
+
+Salida computacional
+```{r}
+summary(an_e1)
+```
+
+## Practica 
+
+### Importación de base de datos `1_Datos ejer Cap1.xlsx`
+
+```{r}
+library(readxl)
+datadca <- read_excel("1_Datos ejer Cap1.xlsx",
+                      sheet = "Eje1")
+datadca
+```
+
+### Analisis descriptivo
+
+```{r, message=FALSE}
+library(metan)
+desc_stat(datadca,
+          stats = c("mean, se, kurt, skew, min, max")) %>%
+  round_cols()
+```
+Box plot
+
+```{r, message=FALSE}
+library(tidyverse)
+ggplot(data = datadca,
+       aes(x=Cultivar,
+           y=Nem,
+           color=Cultivar)) +
+  geom_boxplot() +
+  geom_jitter() +
+  stat_summary(fun = "mean", geom = "point", color = "black") +
+  theme_classic() +
+  theme(legend.position = "") +
+  labs(x="Variedades",
+       y="Número de nemátodos") 
+```
+
+
+### Analisis de varianza
+
+```{r}
+library(AgroR)
+with(datadca, DIC(Cultivar, Nem, ylab = "Nemátodos")) # tukey
+```
+
+
