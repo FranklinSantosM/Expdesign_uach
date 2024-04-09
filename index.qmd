@@ -145,3 +145,157 @@ with(datadca, DIC(Cultivar, Nem, ylab = "Nemátodos")) # tukey
 ```
 
 
+
+## Practica en clases (segunda clase)
+
+Cargar la libreria para analizar datos
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(agricolae)
+```
+
+Importamos la base de datos
+
+```{r}
+datadca <- read_excel("1_Datos ejer Cap1.xlsx",
+                      sheet = "Eje1")
+head(datadca)
+```
+Vemos que la variable cultivar esta en formato caracter, por tanto, se requiere la transformacion de datos como factor.
+
+```{r}
+## Transformacion de datos a factor y numerico
+datadca = datadca%>%
+  mutate_at(c('Cultivar'), as.factor)
+head(datadca)
+```
+Una vez verificada que nuestras variables esten en formato fator y numerica se procede a realizar la respectiva analisis de varianza.
+
+
+```{r}
+### analisis de varianza
+av_nema = aov(Nem~Cultivar, data = datadca)
+summary(av_nema)
+```
+De acuerdo a la tabla de analisis de varianza rechazamos de la hipotesis nula y al menos existe diferencia significativa entre cultivares respecto al numero de nematodos.
+
+Verificada la diferencia significativa, se procede a un analisis de medias para identificar el cultivar menos infestado con nematodos.
+
+```{r}
+### analisis de datos a posteriori
+##prueba posteriori LSD
+lsd_nem = LSD.test(av_nema, "Cultivar", group = T, console = T)
+```
+
+De acuerdo a los resultados de diferencia minima significativa se puede identificar que el cultivar `Pitau` tuvo una infestacion minima de nematodos.
+
+Asimismo, se procede a analizar con la prueba de `TUKEY`
+
+```{r}
+##prueba posteriori TUKEY
+dhs_nem = HSD.test(av_nema, "Cultivar", alpha = 0.01, group = T)
+print(dhs_nem)
+
+dhs_nem2 = TukeyHSD(av_nema, conf.level = .99, console = T, ordered = T)
+dhs_nem2
+```
+
+La prueba de Tukey corrobora lo antes mencionado.
+
+
+### Ejercicios de practica 
+
+```{r}
+## Segunda practica
+
+dataEJ3 <- read_excel("1_Datos ejer Cap1.xlsx",
+                      sheet = "Eje3")
+head(dataEJ3)
+
+## Transformacion de datos a factor y numerico
+dataEJ3 = dataEJ3%>%
+  mutate_at(c('Dieta'), as.factor)%>%
+  mutate_at(c('C_suero'), as.numeric)
+head(dataEJ3)
+
+### analisis de varianza
+av_dieta = aov(C_suero~Dieta, data = dataEJ3)
+summary(av_dieta)
+
+### analisis de datos a posteriori
+##prueba posteriori TUKEY
+dieta <- HSD.test(av_dieta, "Dieta", alpha=0.01, group=TRUE)
+print(dieta)
+
+
+
+
+
+#### Ejercicio 4
+dataEJ4 <- read_excel("1_Datos ejer Cap1.xlsx",
+                      sheet = "Eje4")
+head(dataEJ4)
+
+dataEJ4 = dataEJ4%>%
+  mutate_at(c('Sector'), as.factor)
+head(dataEJ4)
+
+### analisis de varianza
+av_sector = aov(salario~Sector, data = dataEJ4)
+summary(av_sector)
+
+### analisis de datos a posteriori
+
+##prueba posteriori TUKEY
+dhs_sector = HSD.test(av_sector, "Sector", alpha=0.01, group=T)
+print(dhs_sector)
+
+
+#### Ejercicio 2
+dataEJ2 <- read_excel("1_Datos ejer Cap1.xlsx",
+                      sheet = "Eje2")
+head(dataEJ2)
+
+## Transformacion de datos a factor y numerico
+dataEJ2 = dataEJ2%>%
+  mutate_at(c('Tipo_cereal'), as.factor)%>%
+  mutate_at(c('C_tianina'), as.numeric)
+head(dataEJ2)
+
+### analisis de varianza
+av_cereal = aov(C_tianina~Tipo_cereal, data = dataEJ2)
+summary(av_cereal)
+
+### analisis de datos a posteriori
+
+##prueba posteriori TUKEY
+dhs_cereal <- HSD.test(av_cereal, "Tipo_cereal", alpha=0.10, group=T)
+print(dhs_cereal)
+
+
+#### Ejecicio de colores 5
+dataEJ5 <- read_excel("1_Datos ejer Cap1.xlsx",
+                      sheet = "Eje5")
+head(dataEJ5)
+
+## Transformacion de datos a factor y numerico
+dataEJ5 = dataEJ5%>%
+  mutate_at(c('color'), as.factor)
+head(dataEJ5)
+
+### analisis de varianza
+av_color = aov(insectos~color, data = dataEJ5)
+summary(av_color)
+
+### analisis de datos a posteriori
+
+##prueba posteriori TUKEY
+dhs_color <- HSD.test(av_color, "color", alpha=0.01, group=T)
+print(dhs_color)
+
+
+```
+
+

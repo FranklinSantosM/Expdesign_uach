@@ -420,6 +420,464 @@ Pitau  33.6      d</code></pre>
 </div>
 </section>
 </section>
+<section id="practica-en-clases-segunda-clase" class="level2">
+<h2 class="anchored" data-anchor-id="practica-en-clases-segunda-clase">Practica en clases (segunda clase)</h2>
+<p>Cargar la libreria para analizar datos</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(agricolae)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Importamos la base de datos</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>datadca <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"1_Datos ejer Cap1.xlsx"</span>,</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">sheet =</span> <span class="st">"Eje1"</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(datadca)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  Cultivar   Nem
+  &lt;chr&gt;    &lt;dbl&gt;
+1 Huia       170
+2 Huia       210
+3 Huia       205
+4 Huia       220
+5 Huia       210
+6 Kopu       200</code></pre>
+</div>
+</div>
+<p>Vemos que la variable cultivar esta en formato caracter, por tanto, se requiere la transformacion de datos como factor.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Transformacion de datos a factor y numerico</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>datadca <span class="ot">=</span> datadca<span class="sc">%&gt;%</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'Cultivar'</span>), as.factor)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(datadca)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  Cultivar   Nem
+  &lt;fct&gt;    &lt;dbl&gt;
+1 Huia       170
+2 Huia       210
+3 Huia       205
+4 Huia       220
+5 Huia       210
+6 Kopu       200</code></pre>
+</div>
+</div>
+<p>Una vez verificada que nuestras variables esten en formato fator y numerica se procede a realizar la respectiva analisis de varianza.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de varianza</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>av_nema <span class="ot">=</span> <span class="fu">aov</span>(Nem<span class="sc">~</span>Cultivar, <span class="at">data =</span> datadca)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(av_nema)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df Sum Sq Mean Sq F value Pr(&gt;F)    
+Cultivar     4 124100   31025   234.8 &lt;2e-16 ***
+Residuals   20   2642     132                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>De acuerdo a la tabla de analisis de varianza rechazamos de la hipotesis nula y al menos existe diferencia significativa entre cultivares respecto al numero de nematodos.</p>
+<p>Verificada la diferencia significativa, se procede a un analisis de medias para identificar el cultivar menos infestado con nematodos.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de datos a posteriori</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="do">##prueba posteriori LSD</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>lsd_nem <span class="ot">=</span> <span class="fu">LSD.test</span>(av_nema, <span class="st">"Cultivar"</span>, <span class="at">group =</span> T, <span class="at">console =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Study: av_nema ~ "Cultivar"
+
+LSD t Test for Nem 
+
+Mean Square Error:  132.12 
+
+Cultivar,  means and individual ( 95 %) CI
+
+        Nem       std r       se       LCL       UCL Min Max Q25 Q50 Q75
+Aran   98.0 12.409674 5 5.140428  87.27726 108.72274  82 114  92  96 106
+Huia  203.0 19.235384 5 5.140428 192.27726 213.72274 170 220 205 210 210
+Kopu  205.0  7.905694 5 5.140428 194.27726 215.72274 195 215 200 205 210
+Pitau  33.6  5.856620 5 5.140428  22.87726  44.32274  28  43  30  32  35
+Will   67.4  6.308724 5 5.140428  56.67726  78.12274  58  74  65  68  72
+
+Alpha: 0.05 ; DF Error: 20
+Critical Value of t: 2.085963 
+
+least Significant Difference: 15.16425 
+
+Treatments with the same letter are not significantly different.
+
+        Nem groups
+Kopu  205.0      a
+Huia  203.0      a
+Aran   98.0      b
+Will   67.4      c
+Pitau  33.6      d</code></pre>
+</div>
+</div>
+<p>De acuerdo a los resultados de diferencia minima significativa se puede identificar que el cultivar <code>Pitau</code> tuvo una infestacion minima de nematodos.</p>
+<p>Asimismo, se procede a analizar con la prueba de <code>TUKEY</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="do">##prueba posteriori TUKEY</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>dhs_nem <span class="ot">=</span> <span class="fu">HSD.test</span>(av_nema, <span class="st">"Cultivar"</span>, <span class="at">alpha =</span> <span class="fl">0.01</span>, <span class="at">group =</span> T)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dhs_nem)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$statistics
+  MSerror Df  Mean      CV      MSD
+   132.12 20 121.4 9.46816 27.20958
+
+$parameters
+   test   name.t ntr StudentizedRange alpha
+  Tukey Cultivar   5         5.293253  0.01
+
+$means
+        Nem       std r       se Min Max Q25 Q50 Q75
+Aran   98.0 12.409674 5 5.140428  82 114  92  96 106
+Huia  203.0 19.235384 5 5.140428 170 220 205 210 210
+Kopu  205.0  7.905694 5 5.140428 195 215 200 205 210
+Pitau  33.6  5.856620 5 5.140428  28  43  30  32  35
+Will   67.4  6.308724 5 5.140428  58  74  65  68  72
+
+$comparison
+NULL
+
+$groups
+        Nem groups
+Kopu  205.0      a
+Huia  203.0      a
+Aran   98.0      b
+Will   67.4      c
+Pitau  33.6      d
+
+attr(,"class")
+[1] "group"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>dhs_nem2 <span class="ot">=</span> <span class="fu">TukeyHSD</span>(av_nema, <span class="at">conf.level =</span> .<span class="dv">99</span>, <span class="at">console =</span> T, <span class="at">ordered =</span> T)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>dhs_nem2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Tukey multiple comparisons of means
+    99% family-wise confidence level
+    factor levels have been ordered
+
+Fit: aov(formula = Nem ~ Cultivar, data = datadca)
+
+$Cultivar
+            diff        lwr       upr     p adj
+Will-Pitau  33.8   6.590417  61.00958 0.0013004
+Aran-Pitau  64.4  37.190417  91.60958 0.0000002
+Huia-Pitau 169.4 142.190417 196.60958 0.0000000
+Kopu-Pitau 171.4 144.190417 198.60958 0.0000000
+Aran-Will   30.6   3.390417  57.80958 0.0035183
+Huia-Will  135.6 108.390417 162.80958 0.0000000
+Kopu-Will  137.6 110.390417 164.80958 0.0000000
+Huia-Aran  105.0  77.790417 132.20958 0.0000000
+Kopu-Aran  107.0  79.790417 134.20958 0.0000000
+Kopu-Huia    2.0 -25.209583  29.20958 0.9986312</code></pre>
+</div>
+</div>
+<p>La prueba de Tukey corrobora lo antes mencionado.</p>
+<section id="ejercicios-de-practica" class="level3">
+<h3 class="anchored" data-anchor-id="ejercicios-de-practica">Ejercicios de practica</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Segunda practica</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>dataEJ3 <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"1_Datos ejer Cap1.xlsx"</span>,</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">sheet =</span> <span class="st">"Eje3"</span>)</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataEJ3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  Dieta   C_suero
+  &lt;chr&gt;   &lt;chr&gt;  
+1 Premuda 97.9   
+2 Premuda 90.5   
+3 Premuda 99.4   
+4 Premuda 73.6   
+5 Premuda 74.4   
+6 Ayuno   98.8   </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Transformacion de datos a factor y numerico</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>dataEJ3 <span class="ot">=</span> dataEJ3<span class="sc">%&gt;%</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'Dieta'</span>), as.factor)<span class="sc">%&gt;%</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'C_suero'</span>), as.numeric)</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataEJ3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  Dieta   C_suero
+  &lt;fct&gt;     &lt;dbl&gt;
+1 Premuda    97.9
+2 Premuda    90.5
+3 Premuda    99.4
+4 Premuda    73.6
+5 Premuda    74.4
+6 Ayuno      98.8</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de varianza</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>av_dieta <span class="ot">=</span> <span class="fu">aov</span>(C_suero<span class="sc">~</span>Dieta, <span class="at">data =</span> dataEJ3)</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(av_dieta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+Dieta        4  48307   12077   75.92 8.42e-12 ***
+Residuals   20   3181     159                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de datos a posteriori</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="do">##prueba posteriori TUKEY</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>dieta <span class="ot">&lt;-</span> <span class="fu">HSD.test</span>(av_dieta, <span class="st">"Dieta"</span>, <span class="at">alpha=</span><span class="fl">0.01</span>, <span class="at">group=</span><span class="cn">TRUE</span>)</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dieta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$statistics
+   MSerror Df    Mean       CV      MSD
+  159.0644 20 120.968 10.42596 29.85548
+
+$parameters
+   test name.t ntr StudentizedRange alpha
+  Tukey  Dieta   5         5.293253  0.01
+
+$means
+          C_suero       std r       se   Min   Max   Q25   Q50   Q75
+60salvado  206.16 19.837792 5 5.640291 177.5 226.1 197.2 207.3 222.7
+80salvado  110.70  8.453402 5 5.640291 101.1 119.9 102.9 112.1 117.5
+Ayuno      112.86 11.990746 5 5.640291  98.8 129.1 103.6 115.2 117.6
+Mmalta      87.96  5.549144 5 5.640291  82.9  96.4  83.1  87.8  89.6
+Premuda     87.16 12.480104 5 5.640291  73.6  99.4  74.4  90.5  97.9
+
+$comparison
+NULL
+
+$groups
+          C_suero groups
+60salvado  206.16      a
+Ayuno      112.86      b
+80salvado  110.70      b
+Mmalta      87.96      b
+Premuda     87.16      b
+
+attr(,"class")
+[1] "group"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="do">#### Ejercicio 4</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>dataEJ4 <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"1_Datos ejer Cap1.xlsx"</span>,</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">sheet =</span> <span class="st">"Eje4"</span>)</span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataEJ4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  Sector   salario
+  &lt;chr&gt;      &lt;dbl&gt;
+1 Valencia     299
+2 Valencia     313
+3 Valencia     300
+4 Valencia     321
+5 Valencia     308
+6 Valencia     312</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>dataEJ4 <span class="ot">=</span> dataEJ4<span class="sc">%&gt;%</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'Sector'</span>), as.factor)</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataEJ4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  Sector   salario
+  &lt;fct&gt;      &lt;dbl&gt;
+1 Valencia     299
+2 Valencia     313
+3 Valencia     300
+4 Valencia     321
+5 Valencia     308
+6 Valencia     312</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de varianza</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>av_sector <span class="ot">=</span> <span class="fu">aov</span>(salario<span class="sc">~</span>Sector, <span class="at">data =</span> dataEJ4)</span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(av_sector)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             Df Sum Sq Mean Sq F value Pr(&gt;F)    
+Sector        2  86713   43356     558 &lt;2e-16 ***
+Residuals   147  11422      78                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de datos a posteriori</span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="do">##prueba posteriori TUKEY</span></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>dhs_sector <span class="ot">=</span> <span class="fu">HSD.test</span>(av_sector, <span class="st">"Sector"</span>, <span class="at">alpha=</span><span class="fl">0.01</span>, <span class="at">group=</span>T)</span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dhs_sector)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$statistics
+   MSerror  Df     Mean       CV      MSD
+  77.70082 147 274.0467 3.216535 5.217182
+
+$parameters
+   test name.t ntr StudentizedRange alpha
+  Tukey Sector   3         4.185123  0.01
+
+$means
+          salario      std  r       se Min Max Q25   Q50    Q75
+Alicante   279.10 8.593424 50 1.246602 265 304 272 280.0 284.75
+Castellón  242.40 8.228869 50 1.246602 229 261 236 242.5 248.00
+Valencia   300.64 9.567718 50 1.246602 276 321 295 300.0 308.00
+
+$comparison
+NULL
+
+$groups
+          salario groups
+Valencia   300.64      a
+Alicante   279.10      b
+Castellón  242.40      c
+
+attr(,"class")
+[1] "group"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="do">#### Ejercicio 2</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>dataEJ2 <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"1_Datos ejer Cap1.xlsx"</span>,</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">sheet =</span> <span class="st">"Eje2"</span>)</span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataEJ2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  Tipo_cereal C_tianina
+  &lt;chr&gt;       &lt;chr&gt;    
+1 Trigo       5.2      
+2 Trigo       4.5      
+3 Trigo       6        
+4 Trigo       6.1      
+5 Trigo       6.7      
+6 Trigo       5.8      </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Transformacion de datos a factor y numerico</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>dataEJ2 <span class="ot">=</span> dataEJ2<span class="sc">%&gt;%</span></span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'Tipo_cereal'</span>), as.factor)<span class="sc">%&gt;%</span></span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'C_tianina'</span>), as.numeric)</span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataEJ2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  Tipo_cereal C_tianina
+  &lt;fct&gt;           &lt;dbl&gt;
+1 Trigo             5.2
+2 Trigo             4.5
+3 Trigo             6  
+4 Trigo             6.1
+5 Trigo             6.7
+6 Trigo             5.8</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de varianza</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>av_cereal <span class="ot">=</span> <span class="fu">aov</span>(C_tianina<span class="sc">~</span>Tipo_cereal, <span class="at">data =</span> dataEJ2)</span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(av_cereal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df Sum Sq Mean Sq F value Pr(&gt;F)  
+Tipo_cereal  3  42.89  14.297    3.08 0.0509 .
+Residuals   20  92.83   4.641                 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de datos a posteriori</span></span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a><span class="do">##prueba posteriori TUKEY</span></span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>dhs_cereal <span class="ot">&lt;-</span> <span class="fu">HSD.test</span>(av_cereal, <span class="st">"Tipo_cereal"</span>, <span class="at">alpha=</span><span class="fl">0.10</span>, <span class="at">group=</span>T)</span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dhs_cereal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$statistics
+  MSerror Df Mean       CV      MSD
+   4.6415 20  6.9 31.22339 3.044551
+
+$parameters
+   test      name.t ntr StudentizedRange alpha
+  Tukey Tipo_cereal   4         3.461543   0.1
+
+$means
+       C_tianina       std r        se Min  Max   Q25  Q50    Q75
+Avena   7.716667 3.9448278 6 0.8795359 3.0 12.5 4.750 7.40 10.950
+cebada  8.666667 1.4023789 6 0.8795359 6.5 10.0 8.000 8.75  9.875
+Maíz    5.500000 0.6693280 6 0.8795359 4.7  6.4 4.975 5.50  5.950
+Trigo   5.716667 0.7678976 6 0.8795359 4.5  6.7 5.350 5.90  6.075
+
+$comparison
+NULL
+
+$groups
+       C_tianina groups
+cebada  8.666667      a
+Avena   7.716667     ab
+Trigo   5.716667     ab
+Maíz    5.500000      b
+
+attr(,"class")
+[1] "group"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="do">#### Ejecicio de colores 5</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>dataEJ5 <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"1_Datos ejer Cap1.xlsx"</span>,</span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">sheet =</span> <span class="st">"Eje5"</span>)</span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataEJ5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  color insectos
+  &lt;chr&gt;    &lt;dbl&gt;
+1 Azul        16
+2 Azul        11
+3 Azul        20
+4 Azul        21
+5 Azul        14
+6 Azul         7</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Transformacion de datos a factor y numerico</span></span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>dataEJ5 <span class="ot">=</span> dataEJ5<span class="sc">%&gt;%</span></span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'color'</span>), as.factor)</span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataEJ5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  color insectos
+  &lt;fct&gt;    &lt;dbl&gt;
+1 Azul        16
+2 Azul        11
+3 Azul        20
+4 Azul        21
+5 Azul        14
+6 Azul         7</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de varianza</span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>av_color <span class="ot">=</span> <span class="fu">aov</span>(insectos<span class="sc">~</span>color, <span class="at">data =</span> dataEJ5)</span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(av_color)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+color        3   4218    1406   30.55 1.15e-07 ***
+Residuals   20    921      46                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de datos a posteriori</span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a><span class="do">##prueba posteriori TUKEY</span></span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>dhs_color <span class="ot">&lt;-</span> <span class="fu">HSD.test</span>(av_color, <span class="st">"color"</span>, <span class="at">alpha=</span><span class="fl">0.01</span>, <span class="at">group=</span>T)</span>
+<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dhs_color)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$statistics
+  MSerror Df     Mean       CV      MSD
+   46.025 20 27.29167 24.85804 13.89803
+
+$parameters
+   test name.t ntr StudentizedRange alpha
+  Tukey  color   4         5.018016  0.01
+
+$means
+         insectos      std r       se Min Max   Q25  Q50   Q75
+Amarillo 47.16667 6.794606 6 2.769627  38  59 45.25 46.5 47.75
+Azul     14.83333 5.344779 6 2.769627   7  21 11.75 15.0 19.00
+Blanco   15.66667 3.326660 6 2.769627  12  21 13.25 15.5 17.00
+Verde    31.50000 9.914636 6 2.769627  15  41 26.75 34.5 38.50
+
+$comparison
+NULL
+
+$groups
+         insectos groups
+Amarillo 47.16667      a
+Verde    31.50000      b
+Blanco   15.66667      c
+Azul     14.83333      c
+
+attr(,"class")
+[1] "group"</code></pre>
+</div>
+</div>
+</section>
+</section>
 
 </main>
 <!-- /main column -->
