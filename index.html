@@ -817,9 +817,10 @@ attr(,"class")
 6 Azul         7</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Transformacion de datos a factor y numerico</span></span>
-<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>dataEJ5 <span class="ot">=</span> dataEJ5<span class="sc">%&gt;%</span></span>
-<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'color'</span>), as.factor)</span>
-<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataEJ5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>dataEJ5 <span class="ot">&lt;-</span> dataEJ5<span class="sc">%&gt;%</span></span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'color'</span>), as.factor)<span class="sc">%&gt;%</span></span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'insectos'</span>), as.numeric)</span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataEJ5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 2
   color insectos
@@ -831,9 +832,11 @@ attr(,"class")
 5 Azul        14
 6 Azul         7</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de varianza</span></span>
-<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>av_color <span class="ot">=</span> <span class="fu">aov</span>(insectos<span class="sc">~</span>color, <span class="at">data =</span> dataEJ5)</span>
-<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(av_color)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>color <span class="ot">=</span> <span class="fu">as.factor</span>(dataEJ5<span class="sc">$</span>color) <span class="co"># funciona para correr levene</span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>insectos <span class="ot">=</span> <span class="fu">as.numeric</span>(dataEJ5<span class="sc">$</span>insectos) <span class="co"># funciona para correr levene</span></span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de varianza</span></span>
+<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>av_color <span class="ot">=</span> <span class="fu">aov</span>(insectos<span class="sc">~</span>color, <span class="at">data =</span> dataEJ5)</span>
+<span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(av_color)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            Df Sum Sq Mean Sq F value   Pr(&gt;F)    
 color        3   4218    1406   30.55 1.15e-07 ***
@@ -875,8 +878,359 @@ Azul     14.83333      c
 attr(,"class")
 [1] "group"</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Homogeneidad de varianzas</span></span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: carData</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'car'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:dplyr':
+
+    recode</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:purrr':
+
+    some</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="fu">leveneTest</span>(insectos, <span class="at">group=</span>color, <span class="at">center =</span> <span class="st">"median"</span>, <span class="at">data =</span> dataEJ5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Levene's Test for Homogeneity of Variance (center = "median": dataEJ5)
+      Df F value Pr(&gt;F)
+group  3  1.2875 0.3059
+      20               </code></pre>
+</div>
 </div>
 </section>
+</section>
+<section id="clase-3" class="level2">
+<h2 class="anchored" data-anchor-id="clase-3">Clase 3</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>datadca <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"1_Datos ejer Cap1.xlsx"</span>,</span>
+<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">sheet =</span> <span class="st">"Eje1"</span>)</span>
+<span id="cb92-4"><a href="#cb92-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(datadca)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  Cultivar   Nem
+  &lt;chr&gt;    &lt;dbl&gt;
+1 Huia       170
+2 Huia       210
+3 Huia       205
+4 Huia       220
+5 Huia       210
+6 Kopu       200</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Transformacion de datos a factor y numerico</span></span>
+<span id="cb94-3"><a href="#cb94-3" aria-hidden="true" tabindex="-1"></a>datadca <span class="ot">=</span> datadca<span class="sc">%&gt;%</span></span>
+<span id="cb94-4"><a href="#cb94-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'Cultivar'</span>), as.factor)</span>
+<span id="cb94-5"><a href="#cb94-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(datadca)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  Cultivar   Nem
+  &lt;fct&gt;    &lt;dbl&gt;
+1 Huia       170
+2 Huia       210
+3 Huia       205
+4 Huia       220
+5 Huia       210
+6 Kopu       200</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="do">### analisis de varianza</span></span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>av_nema <span class="ot">=</span> <span class="fu">aov</span>(Nem<span class="sc">~</span>Cultivar, <span class="at">data =</span> datadca)</span>
+<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(av_nema)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df Sum Sq Mean Sq F value Pr(&gt;F)    
+Cultivar     4 124100   31025   234.8 &lt;2e-16 ***
+Residuals   20   2642     132                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Transformacion de datos a factor y numerico</span></span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>Cultivar <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(datadca<span class="sc">$</span>Cultivar)</span>
+<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a>Nem <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(datadca<span class="sc">$</span>Nem)</span>
+<span id="cb98-4"><a href="#cb98-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb98-5"><a href="#cb98-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb98-6"><a href="#cb98-6" aria-hidden="true" tabindex="-1"></a><span class="co"># normalidad</span></span>
+<span id="cb98-7"><a href="#cb98-7" aria-hidden="true" tabindex="-1"></a><span class="fu">shapiro.test</span>(<span class="fu">resid</span>(av_nema))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Shapiro-Wilk normality test
+
+data:  resid(av_nema)
+W = 0.92604, p-value = 0.07045</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Análisis gráfico</span></span>
+<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a><span class="fu">qqnorm</span>(av_nema<span class="sc">$</span>residuals) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Homogeneidad de varianza</span></span>
+<span id="cb101-2"><a href="#cb101-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Opción 1. Levene test</span></span>
+<span id="cb101-3"><a href="#cb101-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)</span>
+<span id="cb101-4"><a href="#cb101-4" aria-hidden="true" tabindex="-1"></a><span class="fu">leveneTest</span>(Nem, <span class="at">group=</span>Cultivar, <span class="at">center =</span> <span class="st">"median"</span>, <span class="at">data =</span> datadca)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Levene's Test for Homogeneity of Variance (center = "median": datadca)
+      Df F value Pr(&gt;F)
+group  4  0.5987 0.6678
+      20               </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Homogeneidad de varianza</span></span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Opción 2. Bartlett test</span></span>
+<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(agricolae)</span>
+<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a><span class="fu">bartlett.test</span>(av_nema<span class="sc">$</span>residuals <span class="sc">~</span> Cultivar)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Bartlett test of homogeneity of variances
+
+data:  av_nema$residuals by Cultivar
+Bartlett's K-squared = 7.687, df = 4, p-value = 0.1037</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Independencia</span></span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a><span class="fu">durbinWatsonTest</span>(av_nema)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> lag Autocorrelation D-W Statistic p-value
+   1      -0.1330911      1.837572    0.19
+ Alternative hypothesis: rho != 0</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb107"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Ejercicio 1</span></span>
+<span id="cb107-2"><a href="#cb107-2" aria-hidden="true" tabindex="-1"></a><span class="co">#tabla andeva</span></span>
+<span id="cb107-3"><a href="#cb107-3" aria-hidden="true" tabindex="-1"></a><span class="fu">qf</span>(<span class="fl">0.95</span>, <span class="dv">2</span>, <span class="dv">71</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.125764</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb109"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qf</span>(<span class="fl">0.99</span>, <span class="dv">2</span>, <span class="dv">71</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4.917215</code></pre>
+</div>
+</div>
+</section>
+<section id="ejercicio-2-de-la-practica" class="level2">
+<h2 class="anchored" data-anchor-id="ejercicio-2-de-la-practica">Ejercicio 2 de la practica</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb111"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a>dbe1 <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"Ej2.xlsx"</span>)</span>
+<span id="cb111-2"><a href="#cb111-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dbe1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  Medio_cultivo Brotes
+  &lt;chr&gt;          &lt;dbl&gt;
+1 Testigo            3
+2 Testigo            1
+3 Testigo            3
+4 Testigo            3
+5 Testigo            7
+6 Testigo            6</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb113"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(dbe1, <span class="fu">DIC</span>(Medio_cultivo, Brotes, <span class="at">ylab =</span> <span class="st">"Numero de brotes"</span>)) <span class="co"># tukey</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+-----------------------------------------------------------------
+Normality of errors
+-----------------------------------------------------------------
+                         Method Statistic    p.value
+ Shapiro-Wilk normality test(W) 0.9470772 0.03062369</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>As the calculated p-value is less than the 5% significance level, H0 is rejected. Therefore, errors do not follow a normal distribution</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+-----------------------------------------------------------------
+Homogeneity of Variances
+-----------------------------------------------------------------
+                              Method Statistic    p.value
+ Bartlett test(Bartlett's K-squared)  15.50982 0.00142896</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>As the calculated p-value is less than the 5% significance level, H0 is rejected.Therefore, the variances are not homogeneous</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+-----------------------------------------------------------------
+Independence from errors
+-----------------------------------------------------------------
+                 Method Statistic   p.value
+ Durbin-Watson test(DW)  1.819563 0.1402301</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>As the calculated p-value is greater than the 5% significance level, hypothesis H0 is not rejected. Therefore, errors can be considered independent</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+-----------------------------------------------------------------
+Additional Information
+-----------------------------------------------------------------
+
+CV (%) =  61.77
+MStrat/MST =  0.61
+Mean =  5.6458
+Median =  5
+Possible outliers =  No discrepant point
+
+-----------------------------------------------------------------
+Analysis of Variance
+-----------------------------------------------------------------
+          Df    Sum Sq  Mean.Sq  F value     Pr(F)
+Treatment  3  57.89583 19.29861 1.586928 0.2060557
+Residuals 44 535.08333 12.16098                   </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>As the calculated p-value is greater than the 5% significance level, H0 is not rejected</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+
+-----------------------------------------------------------------
+Multiple Comparison Test: Tukey HSD
+-----------------------------------------------------------------
+[1] "H0 is not rejected"</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code></code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Your analysis is not valid, suggests using a non-parametric test and try to transform the data</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-29-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb125"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a><span class="do">##Analisis de varianza</span></span>
+<span id="cb125-2"><a href="#cb125-2" aria-hidden="true" tabindex="-1"></a>aov_br <span class="ot">=</span> <span class="fu">aov</span>(Brotes<span class="sc">~</span>Medio_cultivo,  <span class="at">data =</span> dbe1)</span>
+<span id="cb125-3"><a href="#cb125-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(aov_br)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              Df Sum Sq Mean Sq F value Pr(&gt;F)
+Medio_cultivo  3   57.9   19.30   1.587  0.206
+Residuals     44  535.1   12.16               </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb127"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(aov_br)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-31-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-31-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-31-4.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb128"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a><span class="co"># normalidad</span></span>
+<span id="cb128-2"><a href="#cb128-2" aria-hidden="true" tabindex="-1"></a><span class="fu">shapiro.test</span>(<span class="fu">resid</span>(aov_br))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Shapiro-Wilk normality test
+
+data:  resid(aov_br)
+W = 0.94708, p-value = 0.03062</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb130"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Transformacion de datos a factor y numerico</span></span>
+<span id="cb130-2"><a href="#cb130-2" aria-hidden="true" tabindex="-1"></a>Medio_cultivo <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(dbe1<span class="sc">$</span>Medio_cultivo)</span>
+<span id="cb130-3"><a href="#cb130-3" aria-hidden="true" tabindex="-1"></a>Brotes <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(dbe1<span class="sc">$</span>Brotes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb131"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Homogeneidad de varianza</span></span>
+<span id="cb131-2"><a href="#cb131-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Opción 1. Levene test</span></span>
+<span id="cb131-3"><a href="#cb131-3" aria-hidden="true" tabindex="-1"></a><span class="fu">leveneTest</span>(Brotes, <span class="at">group=</span>Medio_cultivo, <span class="at">center =</span> <span class="st">"median"</span>, <span class="at">data =</span> dbe11)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Levene's Test for Homogeneity of Variance (center = "median": dbe11)
+      Df F value  Pr(&gt;F)  
+group  3  3.8307 0.01601 *
+      44                  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>Debido a que no se cumple los supuestos de normalidad, homogeneidad e independencia, se procede a transformar los datos con logaritmo para buscar si existe alguna diferencia entre tratamientos</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb133"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Transformacion de datos con logarito (log)</span></span>
+<span id="cb133-2"><a href="#cb133-2" aria-hidden="true" tabindex="-1"></a>aov_br <span class="ot">=</span> <span class="fu">aov</span>(<span class="fu">log</span>(Brotes)<span class="sc">~</span>Medio_cultivo,  <span class="at">data =</span> dbe1)</span>
+<span id="cb133-3"><a href="#cb133-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(aov_br)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              Df Sum Sq Mean Sq F value Pr(&gt;F)
+Medio_cultivo  3  0.822  0.2740   0.579  0.632
+Residuals     44 20.831  0.4734               </code></pre>
+</div>
+</div>
+<p>El resultado es no significativo, aunque se realizo un analisis de varianza con transformacion de datos. Por tanto, no hay diferencias en ningun caso y tampoco cumple los supuestos de normalidad.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb135"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a><span class="fu">leveneTest</span>(<span class="fu">log</span>(Brotes), <span class="at">group=</span>Medio_cultivo, <span class="at">center =</span> <span class="st">"median"</span>, <span class="at">data =</span> dbe11)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Levene's Test for Homogeneity of Variance (center = "median": dbe11)
+      Df F value Pr(&gt;F)
+group  3  1.1459 0.3412
+      44               </code></pre>
+</div>
+</div>
+<p>Sin embargo, realizando una transformacion de datos se pudo cumplir el supuesto de homegeneidad de varianza. Pero, no hay diferencias significativas entre tratamiento de acuerdo al analisis de varianza</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb137"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a><span class="co">#=============================</span></span>
+<span id="cb137-2"><a href="#cb137-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Kruskal-Wallis</span></span>
+<span id="cb137-3"><a href="#cb137-3" aria-hidden="true" tabindex="-1"></a><span class="co">#=============================</span></span>
+<span id="cb137-4"><a href="#cb137-4" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(dbe1, <span class="fu">DIC</span>(Medio_cultivo, Brotes, <span class="at">test =</span> <span class="st">"noparametric"</span>, <span class="at">ylab =</span> <span class="st">"Numero de brotes"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+
+-----------------------------------------------------------------
+Statistics
+-----------------------------------------------------------------
+     Chisq   p.chisq
+  2.454764 0.4835218
+
+
+-----------------------------------------------------------------
+Parameters
+-----------------------------------------------------------------
+            test p.ajusted name.t ntr alpha
+  Kruskal-Wallis      holm   trat   4  0.05
+
+
+-----------------------------------------------------------------
+Multiple Comparison Test: LSD
+-----------------------------------------------------------------
+            Mean       SD     Rank Groups
+AIB_05  6.916667 4.756973 27.87500      a
+BAP_05  4.916667 2.151462 23.66667      a
+BAP_1   6.500000 4.337993 26.70833      a
+Testigo 4.250000 1.602555 19.75000      a</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 </section>
 
 </main>

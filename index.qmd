@@ -281,10 +281,13 @@ dataEJ5 <- read_excel("1_Datos ejer Cap1.xlsx",
 head(dataEJ5)
 
 ## Transformacion de datos a factor y numerico
-dataEJ5 = dataEJ5%>%
-  mutate_at(c('color'), as.factor)
+dataEJ5 <- dataEJ5%>%
+  mutate_at(c('color'), as.factor)%>%
+  mutate_at(c('insectos'), as.numeric)
 head(dataEJ5)
 
+color = as.factor(dataEJ5$color) # funciona para correr levene
+insectos = as.numeric(dataEJ5$insectos) # funciona para correr levene
 ### analisis de varianza
 av_color = aov(insectos~color, data = dataEJ5)
 summary(av_color)
@@ -295,7 +298,140 @@ summary(av_color)
 dhs_color <- HSD.test(av_color, "color", alpha=0.01, group=T)
 print(dhs_color)
 
+# Homogeneidad de varianzas
+library(car)
+leveneTest(insectos, group=color, center = "median", data = dataEJ5)
+```
+
+## Clase 3 
+
+
+```{r}
+library(readxl)
+datadca <- read_excel("1_Datos ejer Cap1.xlsx",
+                      sheet = "Eje1")
+head(datadca)
+```
+
+```{r}
+library(tidyverse)
+## Transformacion de datos a factor y numerico
+datadca = datadca%>%
+  mutate_at(c('Cultivar'), as.factor)
+head(datadca)
+```
+
+```{r}
+### analisis de varianza
+av_nema = aov(Nem~Cultivar, data = datadca)
+summary(av_nema)
+```
+
+
+```{r}
+## Transformacion de datos a factor y numerico
+Cultivar <- as.factor(datadca$Cultivar)
+Nem <- as.numeric(datadca$Nem)
+
+
+# normalidad
+shapiro.test(resid(av_nema))
+## Análisis gráfico
+qqnorm(av_nema$residuals) 
+```
+```{r}
+# Homogeneidad de varianza
+# Opción 1. Levene test
+library(car)
+leveneTest(Nem, group=Cultivar, center = "median", data = datadca)
+```
+
+```{r}
+# Homogeneidad de varianza
+# Opción 2. Bartlett test
+library(agricolae)
+bartlett.test(av_nema$residuals ~ Cultivar)
+```
+
+```{r}
+# Independencia
+durbinWatsonTest(av_nema)
+```
+
+
+```{r}
+#Ejercicio 1
+#tabla andeva
+qf(0.95, 2, 71)
+qf(0.99, 2, 71)
+```
+
+
+
+## Ejercicio 2 de la practica
+
+```{r}
+dbe1 <- read_excel("Ej2.xlsx")
+head(dbe1)
+
 
 ```
 
+```{r}
+with(dbe1, DIC(Medio_cultivo, Brotes, ylab = "Numero de brotes")) # tukey
+```
+
+
+
+```{r}
+##Analisis de varianza
+aov_br = aov(Brotes~Medio_cultivo,  data = dbe1)
+summary(aov_br)
+```
+
+```{r}
+plot(aov_br)
+```
+
+```{r}
+# normalidad
+shapiro.test(resid(aov_br))
+```
+```{r}
+## Transformacion de datos a factor y numerico
+Medio_cultivo <- as.factor(dbe1$Medio_cultivo)
+Brotes <- as.numeric(dbe1$Brotes)
+
+```
+
+
+
+```{r}
+# Homogeneidad de varianza
+# Opción 1. Levene test
+leveneTest(Brotes, group=Medio_cultivo, center = "median", data = dbe11)
+```
+
+Debido a que no se cumple los supuestos de normalidad, homogeneidad e independencia, se procede a transformar los datos con logaritmo para buscar si existe alguna diferencia entre tratamientos
+
+```{r}
+# Transformacion de datos con logarito (log)
+aov_br = aov(log(Brotes)~Medio_cultivo,  data = dbe1)
+summary(aov_br)
+```
+
+El resultado es no significativo, aunque se realizo un analisis de varianza con transformacion de datos. Por tanto, no hay diferencias en ningun caso y tampoco cumple los supuestos de normalidad.
+
+```{r}
+leveneTest(log(Brotes), group=Medio_cultivo, center = "median", data = dbe11)
+```
+Sin embargo, realizando una transformacion de datos se pudo cumplir el supuesto de homegeneidad de varianza. Pero, no hay diferencias significativas entre tratamiento de acuerdo al analisis de varianza 
+
+
+```{r}
+#=============================
+# Kruskal-Wallis
+#=============================
+with(dbe1, DIC(Medio_cultivo, Brotes, test = "noparametric", ylab = "Numero de brotes"))
+```
 
