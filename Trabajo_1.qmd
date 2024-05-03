@@ -1,0 +1,141 @@
+---
+title: "Anexo: Primer trabajo práctico - Diseños Experimentales"
+author:
+  - name: Franklin Santos
+    affiliation: Universidad Austral de Chile
+    orcid: 0000-0002-7509-2910
+  - name: Benjamín Ignacio Díaz Huarnez
+    affiliation: Universidad Austral de Chile
+format: html
+editor: visual
+---
+
+# ANEXOS
+
+## Análisis de base de datos
+
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: true
+library(tidyverse)
+library(metan)
+library(readxl)
+library(kableExtra)
+```
+
+```{r}
+#| echo: true
+db <- read_excel("data_frijol.xlsx")
+head(db)
+```
+
+```{r}
+#| echo: true
+## Analisis descriptivo
+db%>%
+  select(-LINEAS, -BLQ)%>%
+  desc_stat(stats = c("mean, se, kurt, skew, min, max"))%>%
+  round_cols()%>%
+  kbl(caption = "Análisis descriptivo")%>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+```{r}
+#| echo: true
+## Boxplot
+ap = ggplot(data = db,
+            aes(x=LINEAS,
+                y=APL,
+                color=LINEAS)) +
+  geom_boxplot() +
+  geom_jitter() +
+  stat_summary(fun = "mean", geom = "point", color = "black") +
+  theme_classic() +
+  labs(x="Genotipos de frijol",
+       y="Altura de planta (cm)") +
+  guides(x=guide_axis(angle = 45))+
+  theme(legend.position = "none")
+
+nvp = ggplot(data = db,
+            aes(x=LINEAS,
+                y=NVP,
+                color=LINEAS)) +
+  geom_boxplot() +
+  geom_jitter() +
+  stat_summary(fun = "mean", geom = "point", color = "black") +
+  theme_classic() +
+  labs(x="Genotipos de frijol",
+       y="Numero de vainas por planta") +
+  guides(x=guide_axis(angle = 45))+
+  theme(legend.position = "none")
+
+RDTO = ggplot(data = db,
+            aes(x=LINEAS,
+                y=RDTO_P,
+                color=LINEAS)) +
+  geom_boxplot() +
+  geom_jitter() +
+  stat_summary(fun = "mean", geom = "point", color = "black") +
+  theme_classic() +
+  labs(x="Genotipos de frijol",
+       y="Rendimiento por planta (g)") +
+  guides(x=guide_axis(angle = 45))+
+  theme(legend.position = "none")
+
+```
+
+```{r}
+#| echo: false
+arrange_ggplot((ap),
+               (nvp),
+               (RDTO),
+               ncol = 2,
+               tag_levels = "a")
+```
+### Analisis de Varianza y supuestos de normalidad
+
+```{r}
+#| echo: true
+#| message: false
+library(AgroR)
+attach(db)
+a=DBC(trat=LINEAS, 
+             block=BLQ, 
+             response=APL,
+             ylab = "APL",
+             angle = 45)#Tukey
+
+b=DBC(trat=LINEAS, 
+             block=BLQ, 
+             response=NVP,
+             ylab = "NVP",
+             angle = 45)
+
+c=DBC(trat=LINEAS, 
+             block=BLQ, 
+             response=RDTO_P,
+             ylab = "RDTO_P",
+             angle = 45)
+
+library(knitr)
+kable(summarise_anova(list(a,b,c), design = "DBC", divisor = FALSE))
+```
+
+## Segunda base de datos (DCA)
+
+Diseño completamente al azar
+
+```{r}
+#| message: false
+library(AgroR)
+data("bean")
+head(bean)
+
+with(bean, DIC(trat, prod, ylab = "Produccion (g planta)")) # tukey
+```
+
+
+
+

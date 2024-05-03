@@ -362,8 +362,9 @@ durbinWatsonTest(av_nema)
 ```{r}
 #Ejercicio 1
 #tabla andeva
-qf(0.95, 2, 71)
-qf(0.99, 2, 71)
+qf(0.95, 2, 71) #(2=glados de libertad de tratamiento)
+qf(0.99, 2, 71) #(71=grados de libertad del error experimental)
+
 ```
 
 

@@ -1,0 +1,87 @@
+---
+title: "Cap2: Diseño de Bloques Completos al Azar"
+author: "Franklin Santos"
+format: html
+editor: visual
+---
+
+## Practica 
+
+```{r}
+library(data.table)
+(DBA <- fread("https://archive.org/download/byrong_DBA1/DBA1.txt",header=T, sep="\t", dec=","))
+tail(DBA)
+attach(DBA)
+```
+
+Identificación de factores y bloque
+
+```{r}
+TRAT<- factor(DBA$Material)  # definimos los tratamientos
+BLOQ<-factor(DBA$Bloque)     # definimos los bloques
+ALT<-as.vector(DBA$Altura)   # definimos la variable respuesta
+ALT1<-as.numeric(ALT)        # la variable respuesta la definimos como numérica
+```
+
+
+Podemos construir un Boxplot de la variable altura en cada tratamiento.
+
+```{r}
+boxplot(ALT1~TRAT,xlab="Clones de eucalipto", ylab="Altura en metros",col="green3")
+```
+
+Análisis de varianza usando la función (aov)
+
+```{r}
+library(agricolae)  #usamos paquete agricolae
+m1<-aov(ALT1 ~ BLOQ + TRAT)
+anova(m1)
+```
+
+Análisis de varianza usando la función modelo lineal (lm)
+
+```{r}
+m2 <- lm(ALT1 ~ BLOQ + TRAT)
+anova(m2)
+```
+## Evaluación de los Supuestos del modelo estadístico
+### Prueba de normalidad Shapiro-Wilk
+
+Hipótesis:
+
+Ho: Los residuos siguen la distribución normal
+
+Ha: Los residuos no siguen la distribución normal
+
+Prueba de normalidad Shapiro-wilk para los residuos
+```{r}
+shapiro.test(m2$res)
+```
+
+
+Para construir el gráfico QQ-plot y verificar la normalidad, se puede usar el paquete “car” y cargar su respectiva librría con library(car)
+
+```{r}
+library(car)
+qqPlot(m2)
+```
+
+### Gráfico de predichos contra residuos estandarizados
+
+Para evaluar los supuestos de homogeneidad de varianzas e independencia de los residuos, obtenga los valores predichos y los residuos de la siguiente manera:
+```{r}
+fit_m1 <- fitted(m1)  # valores ajustados
+res_m1 <- rstandard(m1) # residuos estandarizados
+plot(fit_m1,res_m1,xlab="Valores predichos", ylab="Residuos estandarizados",abline(h=0))
+```
+
+
+
+
+
+
+
+
+
+
+
